@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<extension version="3.4.5" type="plugin" group="vmpayment" method="upgrade">
+    <name>CHIP</name>
+    <creationDate>August 2026</creationDate>
+    <author>CHIPAsia</author>
+    <authorUrl>https://chip-in.asia</authorUrl>
+    <copyright>Copyright (C) 2026 CHIPAsia. All rights reserved.</copyright>
+    <license>http://www.gnu.org/licenses/gpl-3.0.html GNU/GPL</license>
+    <version>1.0.0</version>
+    <description><![CDATA[Accept payments via <a href="https://chip-in.asia" target="_blank">CHIP</a> (FPX, DuitNow QR, cards, e-wallets and more).]]></description>
+
+    <files>
+        <filename plugin="chip">chip.php</filename>
+        <folder>helpers</folder>
+        <folder>language</folder>
+    </files>
+
+    <vmconfig>
+        <fields name="params">
+            <fieldset name="basic" addfieldpath="/administrator/components/com_virtuemart/fields">
+                <field name="checkConditionsCore" value="1" default="1" type="hidden"/>
+
+                <field type="vmtitle" default="VMPAYMENT_CHIP_ACCOUNT_PARAMS"/>
+                <field name="secret_key" type="password" size="50" label="VMPAYMENT_CHIP_SECRET_KEY"
+                       description="VMPAYMENT_CHIP_SECRET_KEY_TIP" default=""/>
+                <field name="brand_id" type="text" size="50" label="VMPAYMENT_CHIP_BRAND_ID"
+                       description="VMPAYMENT_CHIP_BRAND_ID_TIP" default=""/>
+
+                <field type="vmtitle" default="VMPAYMENT_CHIP_PAYMENT_METHODS"/>
+                <field name="payment_method_whitelist" type="text" size="80" label="VMPAYMENT_CHIP_WHITELIST"
+                       description="VMPAYMENT_CHIP_WHITELIST_TIP" default=""/>
+
+                <field type="vmtitle" default="VMPAYMENT_CHIP_ORDER_STATUS_SECTION"/>
+                <field name="status_pending" type="vmorderstate" scope="com_virtuemart" default="P"
+                       label="VMPAYMENT_CHIP_STATUS_PENDING" description="VMPAYMENT_CHIP_STATUS_PENDING_TIP"/>
+                <field name="status_success" type="vmorderstate" scope="com_virtuemart" default="C"
+                       label="VMPAYMENT_CHIP_STATUS_SUCCESS" description="VMPAYMENT_CHIP_STATUS_SUCCESS_TIP"/>
+                <field name="status_canceled" type="vmorderstate" scope="com_virtuemart" default="X"
+                       label="VMPAYMENT_CHIP_STATUS_CANCELED" description="VMPAYMENT_CHIP_STATUS_CANCELED_TIP"/>
+                <field name="status_refunded" type="vmorderstate" scope="com_virtuemart" default="R"
+                       label="VMPAYMENT_CHIP_STATUS_REFUNDED" description="VMPAYMENT_CHIP_STATUS_REFUNDED_TIP"/>
+
+                <field type="vmtitle" default="VMPAYMENT_CHIP_PAYMENT_BEHAVIOR"/>
+                <field name="due_strict" type="radio" default="0" label="VMPAYMENT_CHIP_DUE_STRICT"
+                       description="VMPAYMENT_CHIP_DUE_STRICT_TIP">
+                    <option value="0">COM_VIRTUEMART_NO</option>
+                    <option value="1">COM_VIRTUEMART_YES</option>
+                </field>
+                <field name="timezone" type="text" size="40" default="Asia/Kuala_Lumpur"
+                       label="VMPAYMENT_CHIP_TIMEZONE" description="VMPAYMENT_CHIP_TIMEZONE_TIP"/>
+
+                <field type="vmtitle" default="VMPAYMENT_CHIP_CURRENCIES_SECTION"/>
+                <field name="payment_currency" type="vmacceptedcurrency" default="" label="VMPAYMENT_CHIP_CURRENCY"
+                       description="VMPAYMENT_CHIP_CURRENCY_TIP"/>
+                <field name="email_currency" type="list" default="vendor" label="VMPAYMENT_CHIP_EMAIL_CURRENCY"
+                       description="VMPAYMENT_CHIP_EMAIL_CURRENCY_TIP">
+                    <option value="vendor">VMPAYMENT_CHIP_EMAIL_CURRENCY_VENDOR</option>
+                    <option value="payment">VMPAYMENT_CHIP_EMAIL_CURRENCY_PAYMENT</option>
+                </field>
+
+                <field type="vmtitle" default="VMPAYMENT_CHIP_TEMPLATE_SECTION"/>
+                <field name="payment_logos" type="vmfiles" multiple="true" directory="/images/virtuemart/payment"
+                       hide_none="1" label="VMPAYMENT_CHIP_LOGOS"
+                       size="40"
+                       description="VMPAYMENT_CHIP_LOGOS_TIP"/>
+                <field name="checkout_text" type="textarea" cols="35" rows="5" label="VMPAYMENT_CHIP_CHECKOUT_TEXT"
+                       description="VMPAYMENT_CHIP_CHECKOUT_TEXT_TIP" default=""/>
+
+                <field type="vmtitle" default="VMPAYMENT_CHIP_RESTRICTIONS_SECTION"/>
+                <field name="countries" multiple="true" type="vmcountries" scope="com_virtuemart" default=""
+                       label="VMPAYMENT_CHIP_COUNTRIES" description="VMPAYMENT_CHIP_COUNTRIES_TIP"/>
+                <field name="min_amount" type="text" label="VMPAYMENT_CHIP_MIN_AMOUNT"
+                       description="VMPAYMENT_CHIP_MIN_AMOUNT_TIP"/>
+                <field name="max_amount" type="text" label="VMPAYMENT_CHIP_MAX_AMOUNT"
+                       description="VMPAYMENT_CHIP_MAX_AMOUNT_TIP"/>
+
+                <field type="vmtitle" default="VMPAYMENT_CHIP_FEE_SECTION"/>
+                <field name="cost_per_transaction" type="text" label="VMPAYMENT_CHIP_COST_PER_TRANSACTION"
+                       description="VMPAYMENT_CHIP_COST_PER_TRANSACTION_TIP"/>
+                <field name="cost_min_transaction" type="text" label="VMPAYMENT_CHIP_COST_MIN_TRANSACTION"
+                       description="VMPAYMENT_CHIP_COST_MIN_TRANSACTION_TIP"/>
+                <field name="cost_percent_total" type="text" label="VMPAYMENT_CHIP_COST_PERCENT_TOTAL"
+                       description="VMPAYMENT_CHIP_COST_PERCENT_TOTAL_TIP"/>
+                <field name="tax_id" type="vmtaxes" scope="com_virtuemart" label="VMPAYMENT_CHIP_TAX"
+                       description="VMPAYMENT_CHIP_TAX_TIP"/>
+            </fieldset>
+        </fields>
+    </vmconfig>
+</extension>
