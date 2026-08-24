@@ -15,14 +15,10 @@
 
 defined('_JEXEC') or die('Restricted access');
 
-if (!class_exists('vmPSPlugin'))
-{
-	require VMPATH_PLUGINLIBS . '/vmpsplugin.php';
-}
-
-use VirtueMart\vmPSPlugin;
-use VirtueMart\VirtueMartCart;
-use VirtueMart\VirtueMartModelOrders;
+// VirtueMart 4.x (released) declares vmPSPlugin / VirtueMartCart /
+// VirtueMartModelOrders in the GLOBAL namespace (no `namespace VirtueMart;`).
+// The SVN trunk (unreleased) has migrated them to the VirtueMart namespace, so
+// do NOT add `use VirtueMart\...` here — it breaks on the released 4.8.0.
 
 class plgVmPaymentChip extends vmPSPlugin
 {
@@ -119,7 +115,7 @@ class plgVmPaymentChip extends vmPSPlugin
 	{
 		$bt = $order['details']['BT'];
 
-		$lang = vmFactory::getLanguage();
+		$lang = JFactory::getLanguage();
 		$tag  = substr($lang->get('tag'), 0, 2);
 		if ($tag === '')
 		{
@@ -135,7 +131,7 @@ class plgVmPaymentChip extends vmPSPlugin
 			'cancel_redirect'  => $cancelUrl,
 			'creator_agent'    => 'VirtueMart: ' . $this->getVersion(),
 			'reference'        => (string) $bt->order_number,
-			'platform'         => 'virtuemart',
+			'platform'         => 'api',
 			'purchase'         => array(
 				'total_override' => $totalInSen,
 				'due_strict'     => !empty($method->due_strict),
@@ -237,12 +233,12 @@ class plgVmPaymentChip extends vmPSPlugin
 
 		if (!empty($bt->virtuemart_country_id))
 		{
-			$client['country'] = substr(shopFunctions::getCountryByID($bt->virtuemart_country_id, 'country_2_code'), 0, 2);
+			$client['country'] = substr(ShopFunctions::getCountryByID($bt->virtuemart_country_id, 'country_2_code'), 0, 2);
 		}
 
 		if (!empty($bt->virtuemart_state_id))
 		{
-			$client['state'] = substr(shopFunctions::getStateByID($bt->virtuemart_state_id, 'state_2_code'), 0, 128);
+			$client['state'] = substr(ShopFunctions::getStateByID($bt->virtuemart_state_id, 'state_2_code'), 0, 128);
 		}
 
 		// Drop empty fields (mirrors WooCommerce/PrestaShop).
@@ -299,7 +295,7 @@ class plgVmPaymentChip extends vmPSPlugin
 	private function buildUrls($order)
 	{
 		$bt = $order['details']['BT'];
-		$root = vmUri::root();
+		$root = JURI::root();
 		$itemId = vRequest::getInt('Itemid', 0);
 		$lang = vRequest::getCmd('lang', '');
 
@@ -338,7 +334,7 @@ class plgVmPaymentChip extends vmPSPlugin
 		vmLanguage::loadJLang('com_virtuemart_orders', true);
 
 		$this->getPaymentCurrency($method, $order['details']['BT']->payment_currency_id);
-		$currencyCode3 = shopFunctions::getCurrencyByID($method->payment_currency, 'currency_code_3');
+		$currencyCode3 = ShopFunctions::getCurrencyByID($method->payment_currency, 'currency_code_3');
 		$emailCurrency = $this->getEmailCurrency($method);
 
 		$totalInPaymentCurrency = vmPSPlugin::getAmountInCurrency($order['details']['BT']->order_total, $method->payment_currency);
@@ -408,7 +404,7 @@ class plgVmPaymentChip extends vmPSPlugin
 		$this->logInfo('CHIP purchase ' . $purchaseId . ' created for order ' . $order['details']['BT']->order_number, 'message');
 
 		// Redirect to CHIP checkout.
-		$application = vmFactory::getApplication();
+		$application = JFactory::getApplication();
 		$application->redirect((string) $purchase['checkout_url']);
 
 		return true;
@@ -429,7 +425,7 @@ class plgVmPaymentChip extends vmPSPlugin
 			return;
 		}
 
-		$db = vmFactory::getDbo();
+		$db = JFactory::getDbo();
 		$set = array();
 		foreach ($values as $column => $value)
 		{
@@ -577,7 +573,7 @@ class plgVmPaymentChip extends vmPSPlugin
 	 */
 	private function getMethodByPurchaseId($purchaseId)
 	{
-		$db = vmFactory::getDbo();
+		$db = JFactory::getDbo();
 		$query = 'SELECT `virtuemart_paymentmethod_id` FROM `' . $this->_tablename
 			. '` WHERE `chip_purchase_id` = ' . $db->quote($purchaseId) . ' LIMIT 1';
 		$db->setQuery($query);

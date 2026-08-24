@@ -60,7 +60,7 @@ No linter is configured; follow the existing style (tabs, `{` on new lines).
   `order_number`, `order_total`, `payment_currency_id`).
 - Order items: `$order['items']` (`order_item_name`, `product_quantity`,
   `product_item_price`).
-- Currency code: `shopFunctions::getCurrencyByID($method->payment_currency, 'currency_code_3')`.
+- Currency code: `ShopFunctions::getCurrencyByID($method->payment_currency, 'currency_code_3')`.
 - Amount in payment currency: `vmPSPlugin::getAmountInCurrency($order_total, $currencyId)`.
 - Order ID by number: `VirtueMartModelOrders::getOrderIdByOrderNumber($n)`.
 - Status update: `VmModel::getModel('orders')->updateStatusForOneOrder($id, $order, true)`.
@@ -75,7 +75,9 @@ No linter is configured; follow the existing style (tabs, `{` on new lines).
   the order via `getOrderIdByOrderNumber`.
 - Payment method whitelist is a **comma-separated string** in method params
   (VirtueMart has no multiselect JSON field type); `resolvePaymentMethodGroups()`
-  resolves the DuitNow QR / Shopee Pay groups.
+  resolves the DuitNow QR / Shopee Pay / Card groups. `card` is an in-memory
+  aggregator key that is expanded to `visa`/`mastercard`/`maestro` and stripped
+  before sending to CHIP (CHIP does not recognise `card` as a whitelist value).
 - Webhook signature is verified with `openssl_verify` (RSA SHA-256) against the
   CHIP public key; on missing/invalid signature, fall back to
   `GET /purchases/{id}/`.
@@ -84,10 +86,21 @@ No linter is configured; follow the existing style (tabs, `{` on new lines).
 
 - API base: `https://gate.chip-in.asia/api/v1` (defined in `helpers/chip_api.php`).
 - Creator agent: `VirtueMart: 1.0.0`.
-- Platform string: `virtuemart`.
+- Platform string: `api` (CHIP has no dedicated `virtuemart`/`joomla` enum value;
+  the valid `platform` choices are `api`, `woocommerce`, `prestashop`, `opencart`,
+  `magento`, `whmcs`, `shopify`, `gravityforms`, `givewp`, `fluentforms`, etc. —
+  custom integrations use `api`).
 
 ## Pitfalls
 
+- **SVN trunk vs released 4.8.0 API drift**: the SVN trunk (`~/refs/virtuemart`)
+  has migrated core classes to the `VirtueMart\` namespace and renamed helpers
+  (`vmFactory`, `vmUri`, `shopFunctions` lowercase). The **released** VirtueMart
+  4.8.0 (what merchants actually run) still uses the GLOBAL namespace and
+  Joomla's `JFactory`/`JURI`/`JRoute` plus `ShopFunctions` (capital S). Always
+  target the released API: `JFactory::getLanguage()/getApplication()/getDbo()`,
+  `JURI::root()`, `ShopFunctions::getCountryByID()/getStateByID()/getCurrencyByID()`.
+  Do NOT add `use VirtueMart\...` imports — they break on 4.8.0.
 - **Class name case**: PHP is case-insensitive, so `plgVmPaymentChip` matches the
   canonical `plgVmPaymentStandard` convention; `vDispatcher` builds
   `plgVmPayment` + `ucfirst('chip')`.

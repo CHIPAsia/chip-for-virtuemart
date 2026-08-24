@@ -274,6 +274,17 @@ class ChipVirtueMartApi
 	{
 		$duitnowGroup = array('duitnow_qr', 'dnqr');
 		$shopeeGroup  = array('razer_shopeepay', 'shopee_pay');
+		$cardGroup    = array('visa', 'mastercard', 'maestro');
+
+		// Card group: 'card' is an in-memory aggregator key (mirrors
+		// chip-for-woocommerce). Expand it to the resolved card-network
+		// identifiers and strip the aggregator key — CHIP does not recognise
+		// 'card' as a payment_method_whitelist value.
+		if (in_array('card', $whitelist, true))
+		{
+			$whitelist = array_values(array_unique(array_merge($whitelist, $cardGroup)));
+		}
+		$whitelist = array_values(array_diff($whitelist, array('card')));
 
 		$hasDnqr   = count(array_intersect($whitelist, $duitnowGroup)) > 0;
 		$hasShopee = count(array_intersect($whitelist, $shopeeGroup)) > 0;
