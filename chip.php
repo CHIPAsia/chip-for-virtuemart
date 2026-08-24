@@ -660,11 +660,20 @@ class plgVmPaymentChip extends vmPSPlugin
 	/**
 	 * Customer redirect handler (CHIP success_redirect / failure_redirect).
 	 *
+	 * The released VirtueMart 4.8.0 vmplg controller triggers this event with
+	 * TWO by-reference params: `$html` (the payment details table) and
+	 * `$paymentResponse` (the headline message, defaulting to
+	 * COM_VIRTUEMART_CART_THANKYOU). We must set `$paymentResponse` to a
+	 * success OR failure message based on the actual CHIP status, otherwise the
+	 * customer always sees "Thank you for your Order!" even when the payment
+	 * failed.
+	 *
 	 * @param string $html
+	 * @param string $paymentResponse
 	 *
 	 * @return bool|null
 	 */
-	public function plgVmOnPaymentResponseReceived(&$html)
+	public function plgVmOnPaymentResponseReceived(&$html, &$paymentResponse = null)
 	{
 		if (!class_exists('VirtueMartCart'))
 		{
@@ -702,6 +711,7 @@ class plgVmPaymentChip extends vmPSPlugin
 
 		// Re-check the actual status from the API (the redirect may race the webhook).
 		$purchaseId = isset($paymentTable->chip_purchase_id) ? $paymentTable->chip_purchase_id : '';
+		$chipStatus = isset($paymentTable->chip_status) ? strtolower((string) $paymentTable->chip_status) : '';
 		if ($purchaseId !== '')
 		{
 			$api = $this->getApi($method);
@@ -709,6 +719,7 @@ class plgVmPaymentChip extends vmPSPlugin
 			if (is_array($payment) && !empty($payment['id']))
 			{
 				$this->processPaymentStatus($payment, $method);
+				$chipStatus = isset($payment['status']) ? strtolower((string) $payment['status']) : $chipStatus;
 			}
 		}
 
@@ -717,6 +728,19 @@ class plgVmPaymentChip extends vmPSPlugin
 
 		$paymentName = $this->renderPluginName($method);
 		$html = $this->_getPaymentResponseHtml($paymentTable, $paymentName);
+
+		// Set the headline message based on the actual payment outcome.
+		if ($paymentResponse !== null)
+		{
+			if ($chipStatus === 'paid')
+			{
+				$paymentResponse = vmText::_('COM_VIRTUEMART_CART_THANKYOU');
+			}
+			else
+			{
+				$paymentResponse = vmText::_('VMPAYMENT_CHIP_PAYMENT_FAILED_RESPONSE');
+			}
+		}
 
 		$link = JRoute::_('index.php?option=com_virtuemart&view=orders&layout=details&order_number=' . $orderNumber . '&order_pass=' . $order['details']['BT']->order_pass, false);
 		$html .= '<br /><a class="vm-button-correct" href="' . $link . '">' . vmText::_('COM_VIRTUEMART_ORDER_VIEW_ORDER') . '</a>';
