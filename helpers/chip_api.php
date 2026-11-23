@@ -148,7 +148,19 @@ class ChipVirtueMartApi
 			));
 
 			$response = @file_get_contents($url, false, $context);
-			$responseHeaders = isset($http_response_header) ? $http_response_header : array();
+			if (function_exists('http_get_last_response_headers'))
+			{
+				// PHP 8.5 deprecates the locally scoped $http_response_header variable.
+				$responseHeaders = http_get_last_response_headers();
+				$responseHeaders = is_array($responseHeaders) ? $responseHeaders : array();
+			}
+			else
+			{
+				// PHP 8.5 deprecates $http_response_header at compile time, so it is read through
+				// a variable variable to keep older branches working without the notice.
+				$compatHeaderName = 'http_response_header';
+				$responseHeaders   = isset(${$compatHeaderName}) ? ${$compatHeaderName} : array();
+			}
 			foreach ($responseHeaders as $headerLine)
 			{
 				if (preg_match('/^HTTP\/\S+\s+(\d{3})/', $headerLine, $matches))
