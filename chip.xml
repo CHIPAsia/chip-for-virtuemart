@@ -6,7 +6,7 @@
     <authorUrl>https://chip-in.asia</authorUrl>
     <copyright>Copyright (C) 2026 CHIPAsia. All rights reserved.</copyright>
     <license>http://www.gnu.org/licenses/gpl-3.0.html GNU/GPL</license>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <description><![CDATA[Accept payments via <a href="https://chip-in.asia" target="_blank">CHIP</a> (FPX, DuitNow QR, cards, e-wallets and more).]]></description>
 
     <files>
